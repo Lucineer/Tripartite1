@@ -1,58 +1,66 @@
-# Tripartite1
+# Tripartite1 🔍
 
-> A local-first, privacy-first agent runtime using tripartite consensus
+You never get a compromised answer here. You get *no* answer, or one that three fully independent agents produced verbatim. No voting, no averaging—exact agreement only.
 
-[![CI](https://github.com/SuperInstance/Tripartite1/actions/workflows/ci.yml/badge.svg)](https://github.com/SuperInstance/Tripartite1/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Rust Version](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://rust-lang.org/)
+This is a prototype exploring multi-agent consensus, built for the Cocapn Fleet. It runs on a single Cloudflare Worker with zero dependencies.
 
-Tripartite1 is a prototype agent runtime where responses are produced only when three specialized agents reach unanimous agreement. It is built for the Cocapn Fleet, an open-source agent protocol.
-
-## Why It Exists
-
-Most AI systems rely on a single model to generate a response. Tripartite1 explores an alternative: requiring consensus among three independent agents before any output is shown. This is a reference implementation of a pattern from the SuperInstance & Lucineer research group, prioritizing deliberation over speed.
-
-## How It Works
-
-Before you see an answer, three agents must independently agree on the final output:
-1.  **Pathos**: Interprets user intent and context.
-2.  **Logos**: Determines the correct method or factual execution.
-3.  **Ethos**: Evaluates safety, accuracy, and appropriateness.
-
-All three must submit identical conclusions. If they cannot reach consensus, the process fails transparently—you see the disagreement.
-
-## Core Features
-
-*   **Tripartite Consensus**: No output is shown without unanimous (3/3) agent agreement.
-*   **Isolated Deliberation**: Agents reason independently; they do not see each other's internal process during consensus building.
-*   **Privacy-First Design**: All processing is local by default.
-*   **Integrated Redaction**: Features 18 patterns for automatically tokenizing sensitive data like credentials and PII before any optional network transmission. Token mappings are stored locally.
-
-## Limitation
-
-This consensus model introduces latency. Generating a response takes longer than a single-agent system, as it requires multiple, separate inference steps and a comparison phase. This is a trade-off for increased deliberation.
-
-## Quick Start
-
-1.  Ensure you have Rust 1.75+ installed.
-2.  Clone the repository:
-    ```bash
-    git clone https://github.com/SuperInstance/Tripartite1.git
-    cd Tripartite1
-    ```
-3.  Build the project:
-    ```bash
-    cargo build --release
-    ```
-4.  Run the basic example to see the consensus flow:
-    ```bash
-    cargo run --example basic_consensus
-    ```
-
-For detailed setup, including model configuration, see the [examples directory](./examples/).
+**Live:** [tripartite1.casey-digennaro.workers.dev](https://tripartite1.casey-digennaro.workers.dev)
 
 ---
 
-<div>
-<small>Part of the <a href="https://the-fleet.casey-digennaro.workers.dev">Cocapn Fleet</a>. By <a href="https://cocapn.ai">Superinstance & Lucineer (DiGennaro et al.)</a>. MIT Licensed.</small>
-</div>
+## Why It Exists
+
+Agents make mistakes. Asking one agent to check its own work often fails. Tripartite1 doesn't try to build a perfect agent. Instead, it surfaces every disagreement by requiring three independent agents to agree exactly. You see the full divergence when they don't.
+
+---
+
+## Quick Start
+
+1.  **Fork** this repo. The code is yours to modify.
+2.  Deploy to Cloudflare Workers: `wrangler deploy`
+3.  Edit agent logic or prompts in `src/lib.rs`
+
+That's it. One Worker, no external services required by default.
+
+---
+
+## How It Works
+
+Three isolated agents run the same query with no inter-agent communication:
+- **Pathos:** Checks alignment with your original intent.
+- **Logos:** Validates reasoning and factual consistency.
+- **Ethos:** Assesses for potential harm or omission.
+
+All three must return the same final answer, word for word. If any output differs, you see all three unredacted responses instead of a single answer.
+
+---
+
+## What Makes It Different
+
+1.  **Unanimous consensus:** Rejects majority (2/3) agreement. Requires a perfect 3/3 match.
+2.  **Complete isolation:** Agents cannot influence each other; no cross-talk or groupthink.
+3.  **Failure as a feature:** Returns nothing rather than a potentially unreliable answer.
+
+---
+
+## Capabilities
+
+- **Exact tripartite consensus:** All output requires verbatim agreement from three agents.
+- **Independent execution:** Agents run in strict isolation with separate system prompts.
+- **On-worker processing:** By default, all logic runs locally within the Worker.
+- **Controlled data sharing:** Optional external calls only occur after automatic redaction of sensitive fields.
+- **Full transparency:** Complete disagreement logs are shown on every consensus failure.
+- **Fork-first design:** The entire system is built to be copied and modified.
+- **MIT licensed:** Free for any use.
+
+---
+
+## Current Limitation
+
+The strict unanimity rule can be overly brittle. If two agents produce identical, correct answers and the third differs by a single punctuation mark, you receive no consensus answer—only the three raw outputs. This design favors precision over recall.
+
+---
+
+Attribution: Superinstance and Lucineer (DiGennaro et al.)
+
+<div style="text-align:center;padding:16px;color:#64748b;font-size:.8rem"><a href="https://the-fleet.casey-digennaro.workers.dev" style="color:#64748b">The Fleet</a> &middot; <a href="https://cocapn.ai" style="color:#64748b">Cocapn</a></div>
